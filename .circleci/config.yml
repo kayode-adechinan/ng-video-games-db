@@ -1,0 +1,50 @@
+version: 2.1
+orbs:
+  cypress: cypress-io/cypress@1
+
+jobs:
+  preview:
+    executor: cypress/base-12
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm run build
+      - run: npm install firebase-tools -g
+      - run: firebase deploy --token ${FIREBASE_TOKEN}
+
+  deploy:
+    executor: cypress/base-12
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm run build
+      - run: npm install netlify-cli -g
+      - run: netlify deploy --prod
+
+workflows:
+  build:
+    jobs:
+      - cypress/install
+      - cypress/run:
+          requires:
+            - cypress/install
+          record: true
+          parallel: true
+          parallelism: 2
+          group: 2 machines
+          start: npm start
+          wait-on: "http://localhost:4200"
+      - preview:
+          requires:
+            - cypress/run
+          filters:
+            branches:
+              only:
+                - develop
+      - deploy:
+          requires:
+            - cypress/run
+          filters:
+            branches:
+              only:
+                - master
