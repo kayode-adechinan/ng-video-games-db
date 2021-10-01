@@ -8,4 +8,4 @@ CI/CD is a way to automate testing and deploiment. This simple project show how 
 - netlfify
 - firebase
 
-in an Angular project
+In an Angular project
